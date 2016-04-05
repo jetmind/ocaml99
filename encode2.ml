@@ -9,7 +9,18 @@ type 'a rle =
     | One of 'a
     | Many of int * 'a;;
 
-let encode l = ???;;
+let encode l =
+  let make_run l =
+    let run_len = List.length l in
+    if run_len > 1 then Many (run_len, List.hd l)
+    else One (List.hd l) in
+  let rec collect acc result = function
+    | [] -> result
+    | [x] -> make_run (x :: acc) :: result
+    | x :: (y :: _ as tail) ->
+      if x = y then collect (x :: acc) result tail
+      else collect [] (make_run (x :: acc) :: result) tail in
+  List.rev (collect [] [] l);;
 
 encode ["a";"a";"a";"a";"b";"c";"c";"a";"a";"d";"e";"e";"e";"e"];;
 (* - : string rle list = *)
